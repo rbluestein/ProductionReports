@@ -1,0 +1,1132 @@
+//
+//
+//					CLIENT METHODS
+//
+//
+
+CREATE     PROCEDURE usp_RptBuildClientSegment101(@CallDate smalldatetime, @AddDate datetime, @ClientID varchar(20), @RetVal varchar(8000) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+BEGIN
+
+	-- // Declarations
+	Declare @Err int
+	Declare @Sql1 varchar(8000)
+	Declare @Sql2 varchar(5000)
+	Declare @FieldName varchar(20)
+	Declare @FieldList varchar(200)
+	Declare @EnhancedFieldList varchar(200)
+	Declare @FieldTable TABLE(RecID int, FieldName varchar(20))
+	Declare @RecID int
+	Declare @Recordcount int
+
+
+	-- // FieldList and EnhancedFieldList
+	SELECT @FieldList = Columns FROM Excel_SegmentConfigure WHERE SegmentId = @ClientID
+	SELECT @Err = @@error
+	IF @Err <> 0
+	Begin
+		Select @RetVal = '1050|usp_RptBuildClientSegment1: Error selecting Columns from Excel_SegmentConfigure'
+		Return
+	End
+	SELECT @EnhancedFieldList = '(EnrollerID, ClientID, CallDate, AddDate, ' + Replace(@FieldList, '|', ',') + ') '
+	
+
+	-- // FieldTable 
+	INSERT INTO @FieldTable Select * FROM dbo.ufn_GetTableFromList(@ClientID)
+	SELECT @Err = @@error
+	IF @Err <> 0
+	Begin
+		Select @RetVal = '1052|usp_RptBuildClientSegment1: Error inserting records into @FieldTable'
+		Return
+	End
+
+
+	-- // Delete the records that are about to be replaced
+	DELETE Rpt_CallHistory WHERE ClientID = @ClientID AND dbo.ufn_IsDateEqual(CallDate, @CallDate) = 1
+	SELECT @Err = @@error
+	IF @Err <> 0
+	Begin
+		Select @RetVal = '1053|usp_RptBuildClientSegment1: Error deleting records from Rpt_CallHistory'
+		Return
+	End
+
+	-- // Start the Sql
+	SELECT @Sql1 = 'SELECT '
+	SELECT @Sql1 = @Sql1 +  'EnrollerID = u.UserID,       '
+	SELECT @Sql1 = @Sql1 + 'ClientID = ''' + @ClientID + ''',         '
+	SELECT @Sql1 = @Sql1 + 'CallDate = ''' + Convert(varchar, @CallDate, 101) + ''',          '
+	SELECT @Sql1 = @Sql1 + 'AddDate = ''' + Convert(varchar, @AddDate,  120) + ''',     '
+
+
+	SELECT @RecID = 1
+	SELECT @Recordcount = Count (*) FROM @FieldTable
+	WHILE @RecID <= @Recordcount
+	Begin
+		SELECT @Sql2 = ''
+		SELECT @FieldName = FieldName FROM @FieldTable WHERE RecID = @RecID
+
+		exec usp_RptBuildClientSegment2 @CallDate, @ClientID, @FieldName, @Sql2 OUTPUT, @RetVal OUTPUT
+
+		If @RetVal <> '0|Success'
+		Begin
+			Return
+		End
+
+		SELECT @Sql1 = @Sql1 + @Sql2
+		SELECT @RecID = @RecID + 1
+	End
+
+
+	-- // Remove the trailing comma
+	SELECT @Sql1 = Substring(@Sql1, 1, Len(@Sql1) - 1)
+
+	-- // Complete the Sql
+	SELECT @Sql1 = @Sql1 + 'FROM UserManagement..Users u '
+	SELECT @Sql1 = @Sql1 + 'WHERE '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EmpTransmittal etMain '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN BVI..Client bviclient on etMain.ClientID = bviclient.ClientID '
+	SELECT @Sql1 = @Sql1 + 'WHERE etMain.LogicalDelete = 0 AND etMain.EnrollerID = u.UserID AND '
+	SELECT @Sql1 = @Sql1 +  'dbo.ufn_IsDateEqual(etMain.CallStartTime, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND etMain.SupervisorApprovalDate IS NOT NULL AND '
+	SELECT @Sql1 = @Sql1  + 'dbo.ufn_IsTestID(bviclient.ClientID, etMain.EmpID) = 0) > 0 '
+	SELECT @Sql1 = @Sql1  + 'OR '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EmpProductTransmittal eptMain '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN ProjectReports..EmpTransmittal etMain on eptMain.ActivityID = etMain.ActivityID '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN BVI..Client bviclient on etMain.ClientID = bviclient.ClientID '
+	SELECT @Sql1 = @Sql1 + 'WHERE eptMain.LogicalDelete = 0 AND eptMain.LicensedEnroller = u.UserID AND '
+	SELECT @Sql1 = @Sql1 +  'dbo.ufn_IsDateEqual(etMain.CallStartTime, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND etMain.SupervisorApprovalDate IS NOT NULL AND '
+	SELECT @Sql1 = @Sql1  + 'dbo.ufn_IsTestID(bviclient.ClientID, etMain.EmpID) = 0) > 0 '
+	SELECT @Sql1 = @Sql1  + 'OR '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EnrollerDate edMain '
+	SELECT @Sql1 = @Sql1 + 'WHERE edMain.EnrollerID = u.UserID AND dbo.ufn_IsDateEqual(edMain.ProjectDate, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND edMain.SupervisorApproval = 1) >0   '
+
+
+	-- // Insert the records into Rpt_CallHistory
+	DELETE Rpt_CallHistoryWorking
+	SELECT @Sql1 = 'INSERT INTO Rpt_CallHistoryWorking ' + @EnhancedFieldList + @Sql1
+	EXEC(@Sql1)
+	SELECT @Err = @@error
+	IF @Err <> 0
+	Begin
+		Select @RetVal = '1054|usp_RptBuildClientSegment1: Error inserting records into Rpt_CallHistoryWorking'
+		Return
+	End
+
+	INSERT INTO Rpt_CallHistory 
+	SELECT * FROM Rpt_CallHistoryWorking WHERE
+	IsNull(NewHires, 0) + IsNull(OpenEnrollment, 0) + IsNull(LSCEnrollment, 0) + IsNull(CSRCalls, 0) + IsNull(Interviewed, 0) + IsNull(Enrolled, 0) + IsNull(ServiceMode, 0) + IsNull(VolEnrollment, 0) + IsNull(BeneficiaryChange, 0) + IsNull(TotalHours, 0) > 0
+	DELETE Rpt_CallHistoryWorking
+	IF @Err <> 0
+	Begin
+		Select @RetVal = '1055|usp_RptBuildClientSegment1: Error inserting records into Rpt_CallHistory'
+		Return
+	End
+
+END
+
+SET NOCOUNT OFF
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE   PROCEDURE usp_RptBuildClientSegment2(@CallDate smalldatetime, @ClientID varchar(20), @FldName varchar(20), @Sql2 varchar(5000) OUTPUT, @RetVal varchar(500) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+BEGIN
+
+	Declare @Err int
+	Declare @EnrollWinCode varchar(12)
+	Declare @Hours varchar(200)
+
+	
+	IF @FldName = 'Name'
+		Set @Sql2 = @Sql2 + 'Name = u.LastName + '', '' + u.FirstName,  '
+ 
+	ELSE IF @FldName IN ('NewHires', 'OpenEnrollment', 'VolEnrollment', 'LSCEnrollment', 'ServiceMode', 'BeneficiaryChange')
+	Begin
+		SELECT @EnrollWinCode = case
+			when @FldName = 'NewHires' then 'NH'
+			when @FldName = 'OpenEnrollment' then 'OE'
+			when @FldName = 'VolEnrollment' then 'VE'
+			when @FldName = 'LSCEnrollment' then 'SC'
+			when @FldName = 'ServiceMode' then 'SM'
+			when @FldName = 'BeneficiaryChange' then 'BC'
+			end
+	
+		SELECT @Sql2 = @Sql2 +  @FldName + ' =  (SELECT Count (*) FROM ProjectReports..EmpTransmittal et2 '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN BVI..Client bviclient ON et2.ClientID = bviclient.ClientID '
+		SELECT @Sql2 = @Sql2 +  dbo.ufn_GetClientJoin(@ClientID, 'et2')
+		SELECT @Sql2 = @Sql2 + 'WHERE et2.LogicalDelete = 0 AND et2.EnrollWinCode = ''' +  @EnrollWinCode + ''' AND et2.ActivityTypeCode NOT IN (''INCOMPLETE'', ''CSR'') AND '
+		SELECT @Sql2 = @Sql2 + dbo.ufn_GetClientWhereSelect(@ClientID, 'et2', 0)
+		SELECT @Sql2 = @Sql2 + ' et2.EnrollerID = u.UserID AND '
+		SELECT @Sql2 = @Sql2 +  'dbo.ufn_IsDateEqual(et2.CallStartTime, ''' + Convert(varchar, @CallDate, 101) + ''') = 1 AND '
+		SELECT @Sql2 = @Sql2  + 'et2.SupervisorApprovalDate IS NOT NULL AND '
+		SELECT @Sql2 = @Sql2  + 'dbo.ufn_IsTestID(bviclient.ClientID, et2.EmpID) = 0), '
+	End
+
+	-- // CSR activity type code overrides the enrollment window code
+	ELSE IF @FldName = 'CSRCalls'
+	Begin
+		SELECT @Sql2 = @Sql2 + 'CSRCalls =  (SELECT Count (*) FROM ProjectReports..EmpTransmittal et2 '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN BVI..Client bviclient ON et2.ClientID = bviclient.ClientID '
+		SELECT @Sql2 = @Sql2 +  dbo.ufn_GetClientJoin(@ClientID, 'et2')
+		SELECT @Sql2 = @Sql2 + 'WHERE et2.LogicalDelete = 0 AND et2.EnrollWinCode IN (''NH'', ''OE'', ''VE'', ''SC'', ''CSR'', ''SM'', ''BC'')  AND '
+		SELECT @Sql2 = @Sql2 + 'et2.ActivityTypeCode =  ''CSR'' AND '
+		SELECT @Sql2 = @Sql2 + dbo.ufn_GetClientWhereSelect(@ClientID, 'et2', 0)
+		SELECT @Sql2 = @Sql2 + ' et2.EnrollerID = u.UserID AND '
+		SELECT @Sql2 = @Sql2 +  'dbo.ufn_IsDateEqual(et2.CallStartTime, ''' + Convert(varchar, @CallDate, 101) + ''') = 1 AND '
+		SELECT @Sql2 = @Sql2  + 'et2.SupervisorApprovalDate IS NOT NULL AND '
+		SELECT @Sql2 = @Sql2  + 'dbo.ufn_IsTestID(bviclient.ClientID, et2.EmpID) = 0),             '
+	End
+
+
+	ELSE IF @FldName = 'Interviewed'
+	Begin
+		SELECT @Sql2 = @Sql2 +  @FldName + ' =  (SELECT Count (*) FROM ProjectReports..EmpTransmittal et2 '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN BVI..Client bviclient ON et2.ClientID = bviclient.ClientID '
+		SELECT @Sql2 = @Sql2 +  dbo.ufn_GetClientJoin(@ClientID, 'et2')
+		SELECT @Sql2 = @Sql2 + 'WHERE '
+		IF @ClientID IN ('ht', 'weathershield')
+		Begin
+			SELECT @Sql2 = @Sql2 + 'EnrollWinCode <> ''SC'' AND EnrollWinCode <> ''SM'' AND '
+		End
+		SELECT @Sql2 = @Sql2 + 'EnrollWinCode <> ''BC'' AND '
+		SELECT @Sql2 = @Sql2 + 'et2.LogicalDelete = 0 AND et2.ActivityTypeCode = ''CALL'' AND '
+		SELECT @Sql2 = @Sql2 + dbo.ufn_GetClientWhereSelect(@ClientID, 'et2', 0)
+		SELECT @Sql2 = @Sql2 + ' et2.EnrollerID = u.UserID AND '
+		SELECT @Sql2 = @Sql2 +  'dbo.ufn_IsDateEqual(et2.CallStartTime, ''' + Convert(varchar, @CallDate, 101) + ''') = 1 AND '
+		SELECT @Sql2 = @Sql2  + 'et2.SupervisorApprovalDate IS NOT NULL AND '
+		SELECT @Sql2 = @Sql2  + 'dbo.ufn_IsTestID(bviclient.ClientID, et2.EmpID) = 0),             '
+	End
+
+	ELSE IF @FldName = 'Enrolled'
+	Begin
+		SELECT @Sql2 = @Sql2 +  @FldName + ' = '
+		SELECT @Sql2 = @Sql2 +  '('
+		SELECT @Sql2 = @Sql2 +  'SELECT Count (*)  From EmpTransmittal etPrimary '	
+		SELECT @Sql2 = @Sql2 +  'INNER JOIN '
+		SELECT @Sql2 = @Sql2 +  '('
+
+                    	-- Non-IAMS: Extended
+		SELECT @Sql2 = @Sql2 +  'SELECT DISTINCT ept2.ActivityID '
+		SELECT @Sql2 = @Sql2 +  'FROM EmpProductTransmittal ept2 '
+		SELECT @Sql2 = @Sql2 +  'INNER JOIN BVI..Client bviclient ON ept2.ClientID = bviclient.ClientID '
+		SELECT @Sql2 = @Sql2 +  'INNER JOIN ProjectReports..EmpTransmittal et2 ON ept2.ActivityID = et2.ActivityID '
+		SELECT @Sql2 = @Sql2 +   dbo.ufn_GetClientJoin(@ClientID, 'et2')
+		SELECT @Sql2 = @Sql2 +  'LEFT JOIN ClientProduct_Extended cpe on ept2.ClientId = cpe.ClientId AND ept2.ProductId = cpe.ClientProductID '
+		SELECT @Sql2 = @Sql2 +  'WHERE ept2.LogicalDelete = 0 AND '
+		SELECT @Sql2 = @Sql2 +   dbo.ufn_GetClientWhereSelect(@ClientID, 'et2', 0)
+		SELECT @Sql2 = @Sql2 +  'cpe.ExtendedInd = 1 AND dbo.ufn_IsDateBetween(''' + Convert(varchar, @CallDate, 101) + ''', cpe.StartDate, cpe.EndDate) = 1 AND '
+		SELECT @Sql2 = @Sql2 +  'ept2.LicensedEnroller = u.UserID AND '
+		SELECT @Sql2 = @Sql2 +  'dbo.ufn_IsDateEqual(et2.CallStartTime, ''' + Convert(varchar, @CallDate, 101) + ''') = 1  AND '
+		SELECT @Sql2 = @Sql2 +  'et2.SupervisorApprovalDate IS NOT NULL '
+		
+		SELECT @Sql2 = @Sql2 +  'UNION '
+	
+		-- IAMS: Standard and AcesSpecial
+		SELECT @Sql2 = @Sql2 +  'SELECT DISTINCT ept2.ActivityID '
+		SELECT @Sql2 = @Sql2 +  'FROM ProjectReports..EmpProductTransmittal ept2 '
+		SELECT @Sql2 = @Sql2 +  'INNER JOIN BVI..Client bviclient ON ept2.ClientID = bviclient.ClientID '
+		SELECT @Sql2 = @Sql2 +  'INNER JOIN ProjectReports..EmpTransmittal et2 ON ept2.ActivityID = et2.ActivityID '
+		SELECT @Sql2 = @Sql2 +  dbo.ufn_GetClientJoin(@ClientID, 'et2')
+		SELECT @Sql2 = @Sql2 +  'INNER JOIN IAMS..AppsAndPolsSummary aps on ept2.ActivityID = aps.ActivityID and ept2.AppID = aps.AppID '
+		SELECT @Sql2 = @Sql2 +  'WHERE ept2.LogicalDelete = 0 AND '
+		SELECT @Sql2 = @Sql2 +  dbo.ufn_GetClientWhereSelect(@ClientID, 'et2', 0)
+		SELECT @Sql2 = @Sql2 +  'aps.BVIAppStatus <> ''CANCELLED'' AND '
+		SELECT @Sql2 = @Sql2 +  'ept2.LicensedEnroller = u.UserID AND '
+		SELECT @Sql2 = @Sql2 +  'dbo.ufn_IsDateEqual(et2.CallStartTime, ''' + Convert(varchar, @CallDate, 101) + ''') = 1 AND '
+		SELECT @Sql2 = @Sql2 +  'et2.SupervisorApprovalDate IS NOT NULL '
+		SELECT @Sql2 = @Sql2 +  ') '
+		SELECT @Sql2 = @Sql2 +  'eptSecondary on etPrimary.ActivityID = eptSecondary.ActivityID '
+		SELECT @Sql2 = @Sql2 +  '),              '
+	End
+
+	ELSE IF @FldName IN ('AdminHours', 'EnrollHours', 'TrainHours', 'CoachHours', 'TotalHours')
+	Begin
+	SELECT @Hours = case
+		when @FldName = 'AdminHours' then ' IsNull(SUM(AdminHours), 0) '
+		when @FldName = 'EnrollHours' then ' IsNull(SUM(EnrollHours), 0) '
+		when @FldName = 'TrainHours' then ' IsNull(SUM(TrainHours), 0) '
+		when @FldName = 'CoachHours' then ' IsNull(SUM(CoachHours), 0) '
+		when @FldName = 'TotalHours' then ' IsNull(SUM(AdminHours), 0) + IsNull(SUM(EnrollHours), 0) + IsNull(SUM(TrainHours), 0) + IsNull(SUM(CoachHours), 0) '
+		end
+	
+		SELECT @Sql2 = @Sql2 +  @FldName + ' = (SELECT ' + @Hours + ' FROM ProjectReports..EnrollerDateProject edp '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN ProjectReports..EnrollerDate ed on edp.EnrollerID = ed.EnrollerID AND edp.ProjectDate = ed.ProjectDate '
+		--SELECT @Sql2 = @Sql2 + 'WHERE edp.ClientID = ''' + @ClientID + ''' AND edp.EnrollerID = u.UserID AND '
+
+		SELECT @Sql2 = @Sql2 + 'WHERE edp.EnrollerID = u.UserID AND '
+		SELECT @Sql2 = @Sql2 +  dbo.ufn_GetClientWhereSelect(@ClientID, 'edp', 1) 
+		SELECT @Sql2 = @Sql2 + 'dbo.ufn_IsDateEqual(ed.ProjectDate, ''' + Convert(varchar, @CallDate, 101) + ''') =1 AND ed.SupervisorApproval = 1),          '
+	End
+
+	SELECT @RetVal = '0|Success'
+END
+
+SET NOCOUNT OFF
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE FUNCTION ufn_GetTableFromList (@SegmentID varchar(200))
+	RETURNS @FieldsTable TABLE (RecID int, FieldName varchar(20))  
+AS
+
+BEGIN
+	Declare @RecID int
+	Declare @SplitOn varchar(1)
+	Declare @FieldList varchar(200)
+
+	Select @FieldList = Columns FROM Excel_SegmentConfigure WHERE SegmentId = @SegmentID
+	Set @SplitOn = '|'
+	Set @RecID = 1
+	While (CharIndex(@SplitOn, @FieldList) > 0)
+	Begin
+		Insert Into @FieldsTable (RecID, FieldName)  Select RecID = @RecID, FieldName = ltrim(rtrim(Substring(@FieldList, 1, CharIndex(@SplitOn, @FieldList) -1) ) )
+		Set @FieldList = Substring(@FieldList, Charindex(@SplitOn, @FieldList)+1, len(@FieldList))
+		Set @RecID = @RecID + 1
+	End
+	INSERT INTO @FieldsTable (RecID, FieldName) Select RecID = @RecID, FieldName = ltrim(rtrim(@FieldList))
+	RETURN
+END
+
+
+
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON 
+GO
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+CREATE   FUNCTION dbo.ufn_GetClientJoin
+(
+@ClientID varchar(20),
+@Prefix varchar(10)
+)
+RETURNS varchar(60)
+AS
+BEGIN
+	DECLARE @Results varchar(60)
+
+	IF @ClientID IN ('MORGANS', 'HARDROCK')
+		SELECT @Results = ' INNER JOIN Morgans..Employee e ON ' + @Prefix + '.EmpID = e.EmpID '
+	ELSE
+		SELECT @Results = ''
+
+	RETURN @Results
+END
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE        FUNCTION dbo.ufn_GetClientWhereSelect
+(
+@ClientID varchar(20),
+@Prefix varchar(10),
+@HoursSection bit
+)
+RETURNS varchar(65)
+AS
+BEGIN
+	DECLARE @Results varchar(65)
+
+	IF @ClientID = 'MORGANS'
+	Begin
+		If @HoursSection = 1
+		Begin
+			SELECT @Results = @Prefix + '.ClientID = ''MORGANS'' AND '
+		End
+		Else
+		Begin
+			SELECT @Results = @Prefix + '.ClientID = ''MORGANS'' AND e.GroupCode <> ''XTA'' AND '
+		End
+	End
+	ELSE IF @ClientID = 'HARDROCK'
+	Begin
+		If @HoursSection = 1
+		Begin
+			SELECT @Results = @Prefix + '.ClientID = ''MORGANS'' AND '
+		End
+		Else
+		Begin
+			SELECT @Results = @Prefix + '.ClientID = ''MORGANS'' AND e.GroupCode = ''XTA'' AND '
+		End
+	End
+	ELSE IF  CharIndex('|', @ClientID) = 0
+	Begin
+		SELECT @Results = @Prefix + '.ClientID = ''' + @ClientID + ''' AND '
+	End
+	ELSE IF  CharIndex('|', @ClientID) > 0
+	Begin
+
+		Declare @SubClientID varchar(20)
+		Declare @ClientRecordcount int
+		Declare @ClientIterator int
+		Declare @SplitOn varchar(1)
+		Declare @ClientList varchar(200)
+		Declare @ClientTable TABLE(RecID int, SubClientID varchar(20))
+		Declare @ClientRecID int
+		Declare @ColumnName varchar(20)
+
+		Set @SplitOn = '|'
+		Set @ClientRecID = 1
+		Set @ClientList = @ClientID
+
+		While (CharIndex(@SplitOn, @ClientList) > 0)
+		Begin
+			Insert Into @ClientTable (RecID, SubClientID)  Select RecID = @ClientRecID, SubClientID = ltrim(rtrim(Substring(@ClientList, 1, CharIndex(@SplitOn, @ClientList) -1) ) )
+			Set @ClientList = Substring(@ClientList, Charindex(@SplitOn, @ClientList)+1, len(@ClientList))
+			Select @ClientRecID = @ClientRecID + 1
+		End
+		INSERT INTO @ClientTable (RecID, SubClientID) Select RecID = @ClientRecID, SubClientID = ltrim(rtrim(@ClientList))
+
+		Set @ClientIterator = 1
+		Select @ClientRecordcount = Count (*) FROM @ClientTable	
+
+		WHILE @ClientIterator <= @ClientRecordcount
+		Begin
+			SELECT @SubClientID = SubClientID FROM @ClientTable WHERE RecID = @ClientIterator
+			If @ClientIterator = 1
+			Begin
+				Select @Results = '(' + @Prefix + '.ClientID = ''' + @SubClientID + ''' OR '
+			End
+			Else If @ClientIterator < @ClientRecordCount
+			Begin
+				Select @Results = @Results  + @Prefix + '.ClientID = ''' + @SubClientID + ''' OR '
+			End
+			Else If @ClientIterator = @ClientRecordCount
+			Begin
+				Select @Results = @Results  + @Prefix + '.ClientID = ''' + @SubClientID + ''') AND '
+			End
+			Set @ClientIterator = @ClientIterator + 1
+		End
+
+	End
+
+	RETURN @Results
+END
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//
+//
+//					STANDARD PRODUCT METHODS
+//
+//
+
+
+CREATE    PROCEDURE usp_RptBuildProductSegmentStandard1(@CallDate smalldatetime, @ClientID varchar(20), @ProductID varchar(20), @FieldName varchar(20), @Sql2 varchar(5000) OUTPUT, @RetVal varchar(200) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+BEGIN
+
+	Declare @RelationCodeClause varchar(70)
+	Declare @AddlCondition varchar(400)
+
+	If @FieldName IN ('EE', 'EEEZ')
+		Set @RelationCodeClause = ' (aps.RelationCode IN (''E'', '''') OR aps.RelationCode is null) '
+	Else If @FieldName IN ('SP', 'SPEZ')
+		Set @RelationCodeClause = ' aps.RelationCode = ''S'' '
+	Else If @FieldName = 'EESP'
+		Set @RelationCodeClause = ' aps.RelationCode In (''ES'', ''ESP'') '
+	Else If @FieldName = 'EECH'
+		Set @RelationCodeClause = ' aps.RelationCode In (''EC'', ''ECH'') '
+	--Else If @FieldName = 'FAM'
+		-- No action. Legal and TMarkCombo are inconsistent.
+	--Else If @FieldName = 'DEP'
+		-- No action. TransUL and TMarkUL are inconsistent.
+	--Else If @FieldName IN ('WEEKLYPREMIUM', 'ANNUALPREMIUM', 'YES', 'EZ1_5', 'EZ1_10', 'EZ2_5')
+		-- No action.
+
+
+	-- // AIG
+	If @ProductID IN ('AIGACC', 'AIGCCI')
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+
+	-- // AllState
+	Else IF @ProductID In ('ALLSTATECANCER', 'ALLSTATECI')
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID = 'ALLSTATEUL'
+	Begin
+		If @FieldName IN ('EE', 'SP', 'EEEZ', 'SPEZ')
+		Begin
+			Set @AddlCondition = case
+				when @FieldName IN ('EE', 'SP') then '(apd.FieldName IS NULL OR apd.FieldName = ''Future Purchase Option Rider'') '
+				when @FieldName IN ('EEEZ', 'SPEZ') then 'apd.FieldName = ''Future Purchase Option Rider'' '
+				end
+			Set @AddlCondition = @AddlCondition + ' AND ' + @RelationCodeClause
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, @AddlCondition, 1, 'et2')
+		End
+		If @FieldName In ('YES', 'DEP', 'WEEKLYPREMIUM', 'ANNUALPREMIUM')
+		Begin
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+		End
+	End
+
+	-- // American General
+	Else If @ProductID = 'AMGENCANCER'
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+
+	-- // Boston Mutual
+	Else If @ProductID IN ('BMCCI', 'BMWLIFE', 'BMDI')
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+
+	-- // EyeMed
+	Else If @ProductID = 'EYEMEDVIS'
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+
+	-- // Both Legal Plan of America and Hyatt Legal use the same ProductID -- Legal -- in IAMS.
+	Else If @ProductID IN ('LEGAL', 'HYATTLEGAL')
+	Begin
+		If @FieldName = 'YES'
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, 'LEGAL', @FieldName, @Sql2 OUTPUT
+		Else If @FieldName = 'FAM'
+		Begin
+			Set @AddlCondition = 'aps.RelationCode = ''E'' '
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, 'LEGAL', 'Count (*)', 'aps.AppDate', @CallDate, @AddlCondition, 0, 'et2')
+		End
+		Else If @FieldName IN ('WEEKLYPREMIUM', 'ANNUALPREMIUM')
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, 'LEGAL', @FieldName, @Sql2 OUTPUT
+		Else
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, 'LEGAL', @FieldName, @Sql2 OUTPUT
+	End
+
+
+	-- // Trustmark
+	Else If @ProductID = 'TMARKACC'
+	Begin
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+	End
+	Else If @ProductID = 'TMARKCOMBO'
+	Begin
+		If @FieldName IN ('EE', 'EESP', 'EECH', 'FAM')
+		Begin
+			--Set @AddlCondition = '(apd.FieldName IS NULL Or apd.FieldName = ''Riders'' AND CharIndex(''EZV'', apd.FieldData) > 0) AND '
+			--Set @AddlCondition = @AddlCondition + @RelationCodeClause
+			Set @AddlCondition =  @RelationCodeClause
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, 'TMARKCOMBO', 'Count (*)', 'aps.AppDate', @CallDate, @AddlCondition, 0, 'et2')
+		End
+
+		Else If @FieldName = 'EZ1_5'
+		Begin
+			--Set @AddlCondition = '(apd.FieldName = ''Riders'' AND CharIndex(''EZV'', apd.FieldData) > 0) '
+			Set @AddlCondition = '(apd.FieldName = ''EZValue'' AND apd.FieldData = ''true'')'
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, 'TMARKCOMBO', 'Count (*)', 'aps.AppDate', @CallDate, @AddlCondition, 1, 'et2')
+		End
+		Else
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+	End
+
+
+	Else If @ProductID = 'TMARKUL'
+	Begin
+		IF @FieldName IN ('EE', 'SP')
+		Begin
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, 'TMARKUL', 'Count (*)', 'aps.AppDate', @CallDate, @RelationCodeClause, 0, 'et2')
+		End
+		Else If @FieldName IN ('EZ1_5', 'EZ1_10', 'EZ2_5')
+		Begin
+			Set @AddlCondition = case
+				when @FieldName = 'EZ1_5' then 'apd.FieldName = ''Riders'' AND CharIndex(''EZV1'', apd.FieldData) > 0'
+				when @FieldName = 'EZ1_10' then 'apd.FieldName = ''Riders'' AND CharIndex(''EZV2'', apd.FieldData) > 0'
+				when @FieldName = 'EZ2_5' then 'apd.FieldName = ''Riders'' AND CharIndex(''EZV3'', apd.FieldData) > 0'
+				end
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, 'TMARKUL', 'Count (*)', 'aps.AppDate', @CallDate, @AddlCondition, 1, 'et2')
+		End
+		Else If @FieldName = 'DEP'
+		Begin
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode = ''C''', 0, 'et2')
+		End
+		Else
+		Begin
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT	
+		End
+	End
+
+	-- // TransAmerica
+	Else If @ProductID IN ('TRANSACC', 'TRANSCCI', 'TRANSDI', 'TRANSTERM')
+	Begin
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+	End
+
+	Else If @ProductID = 'TRANSUL'
+	Begin
+		If @FieldName IN ('EE', 'SP', 'EEEZ', 'SPEZ', 'DEP')
+		Begin
+			Set @AddlCondition = case
+				--when @FieldName IN ('EE', 'SP') then  '(apd.FieldName IS NULL OR apd.FieldData = ''True'')'
+
+				--when @FieldName = 'EE' then  '(apd.FieldName IS NULL OR apd.FieldData = ''True'')  AND aps.RelationCode = ''E'''
+				--when @FieldName = 'SP' then  '(apd.FieldName IS NULL OR apd.FieldData = ''True'')  AND aps.RelationCode = ''S'''
+				--when @FieldName IN ('EEEZ', 'SPEZ') then  'apd.FieldName = ''EZValue'' AND apd.FieldData = ''True'''
+				--when @FieldName = 'DEP' then  '(apd.FieldName IS NULL OR apd.FieldData = ''True'')  AND aps.RelationCode IN (''C'',''D'')'
+
+				when @FieldName = 'EE' then  'aps.RelationCode = ''E'''
+				when @FieldName = 'EEEZ' then  'apd.FieldName  = ''True'' AND aps.RelationCode = ''E'''
+				when @FieldName = 'SP' then  'aps.RelationCode = ''S'''
+				when @FieldName = 'SPEZ' then  'apd.FieldName  = ''True'' AND aps.RelationCode = ''S'''
+				when @FieldName = 'DEP' then  'aps.RelationCode IN (''C'',''D'')'
+				end
+
+			Set @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, 'TRANSUL', 'Count (*)', 'aps.AppDate', @CallDate, @AddlCondition, 1, 'et2')
+		End
+		If @FieldName IN ('YES', 'WEEKLYPREMIUM', 'ANNUALPREMIUM')
+		Begin
+			exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+		End
+	End
+
+
+
+	-- // Unum
+	Else If @ProductID = 'UNUMACC'
+		exec  usp_RptBuildProductSegmentStandard2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+
+	Select @RetVal = @ProductID
+	Return
+
+END
+
+SET NOCOUNT OFF
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+ALTER                PROCEDURE usp_RptBuildProductSegmentStandard2(@CallDate smalldatetime, @ClientID varchar(20), @ProductID varchar(20), @FieldName varchar(20), @Sql2 varchar(5000) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+BEGIN
+	IF @FieldName = 'YES'
+	Begin
+		Set @Sql2 = 'YES = (SELECT Count (*) FROM EmpTransmittal etOuterYes '
+		--Set @Sql2 = 'YES = (SELECT Count (*) FROM EmpProductTransmittal eptOuterYes '
+		Set @Sql2 = @Sql2 + 'INNER JOIN '
+		Set @Sql2 = @Sql2 + '(SELECT DISTINCT etInner.ActivityID '
+		Set @Sql2 = @Sql2 + 'FROM ProjectReports..EmpTransmittal etInner '
+		Set @Sql2 = @Sql2 + 'INNER JOIN ProjectReports..EmpProductTransmittal eptInner ON etInner.ActivityID = eptInner.ActivityID  '
+		Set @Sql2 = @Sql2 + 'INNER JOIN IAMS..AppsAndPolsSummary apsInner ON etInner.ActivityID = apsInner.ActivityID '
+		Set @Sql2 = @Sql2 + 'INNER JOIN BVI..Client bviclient ON apsInner.ClientID = bviclient.ClientID '
+		Set @Sql2 = @Sql2 +  dbo.ufn_GetClientJoin(@ClientID, 'apsInner')
+		Set @Sql2 = @Sql2 + 'WHERE eptInner.LogicalDelete = 0 AND '
+		Set @Sql2 = @Sql2 + 'etInner.SupervisorApprovalDate IS NOT NULL AND '
+		Set @Sql2 = @Sql2 + dbo.ufn_GetClientWhere(@ClientID, 'eptInner')
+		Set @Sql2 = @Sql2 + 'eptInner.LicensedEnroller = u.UserID AND '
+		Set @Sql2 = @Sql2 + 'eptInner.ProductID = ''' + @ProductID + ''' AND '
+		Set @Sql2 = @Sql2 + 'apsInner.BVIAppStatus <> ''CANCELLED'' AND '
+		Set @Sql2 = @Sql2 + 'dbo.ufn_IsDateEqual(etINNER.CallStartTime, ''' + Convert(varchar, @CallDate, 101)  + ''') = 1 AND '
+		Set @Sql2 = @Sql2  + 'dbo.ufn_IsTestID(bviclient.ClientID, etINNER.EmpID) = 0) '
+		Set @Sql2 = @Sql2 + 'YesSpecial ON etOuterYes.ActivityID = YesSpecial.ActivityID) '
+	End
+
+	IF @FieldName = 'EE'
+		Select @Sql2 = 'EE = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, '(aps.RelationCode = ''E'' or aps.RelationCode = '''' or aps.RelationCode is null)', 0, 'et2')
+
+	ELSE IF @FieldName = 'SP'
+		Select @Sql2 = 'SP = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode = ''S''', 0, 'et2')
+
+	ELSE IF @FieldName = 'CH'
+		Select @Sql2 = 'CH = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode = ''C''', 0, 'et2')
+
+	ELSE IF @FieldName = 'EESP'
+		Select @Sql2 = 'EESP = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode IN (''ES'', ''ESP'')', 0, 'et2')
+
+	ELSE IF @FieldName = 'EECH'
+		Select @Sql2 = 'EECH = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode IN (''EC'', ''ECH'')', 0, 'et2')
+
+	ELSE IF @FieldName = 'SPCH'
+		Select @Sql2 = 'SPCH = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode = ''SPC''', 0, 'et2')
+
+	ELSE IF @FieldName = 'FAM'
+		Select @Sql2 = 'FAM = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode IN (''FAM'', ''F'')', 0, 'et2')
+
+	ELSE IF @FieldName = 'DEP'
+		Select @Sql2 = 'DEP = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'Count (*)', 'aps.AppDate', @CallDate, 'aps.RelationCode = ''D''', 0, 'et2')
+
+	ELSE IF @FieldName = 'WEEKLYPREMIUM'
+		Select @Sql2 = 'WEEKLYPREMIUM = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'IsNull(Convert(varchar, SUM(ept.WeeklyPremium)), 0)', 'aps.AppDate', @CallDate, '', 0, 'et2')
+
+	ELSE IF @FieldName = 'ANNUALPREMIUM'
+		Select @Sql2 = 'ANNUALPREMIUM = ' +  dbo.ufn_RptBuildProductSegment3(0, @ClientID, @ProductID, 'IsNull(Convert(varchar, ROUND(SUM(ISNULL(ept.WeeklyPremium, 0)) * 52, 0)), 0)', 'aps.AppDate', @CallDate, '', 0, 'et2')
+
+END
+
+SET NOCOUNT OFF
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//
+//
+//				EXTENDED PRODUCT
+//
+//
+
+
+CREATE               PROCEDURE usp_RptBuildProductSegmentExtended1(@CallDate smalldatetime, @ClientID varchar(20), @ProductID varchar(20), @FieldName varchar(20), @Sql2 varchar(5000) OUTPUT, @RetVal varchar(500) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+BEGIN
+
+	Declare @RelationCodeClause varchar(70)
+	Declare @AddlCondition varchar(400)
+
+	If @FieldName IN ('EE', 'EEEZ')
+		Set @RelationCodeClause = 'alt.RelationCode = ''E'''
+	Else If @FieldName IN ('SP', 'SPEZ')
+		Set @RelationCodeClause = 'alt.RelationCode = ''S'''
+	Else If @FieldName = 'EESP'
+		Set @RelationCodeClause = 'alt.RelationCode = ''ESP'''
+	Else If @FieldName = 'EECH'
+		Set @RelationCodeClause = 'alt.RelationCode = ''ECH'''
+	Else If @FieldName = 'FAM'
+		Set @RelationCodeClause = 'alt.RelationCode = ''FAM'''
+	Else If @FieldName = 'DEP'
+		Set @RelationCodeClause = 'alt.RelationCode = ''C'''
+
+
+	IF @ProductID IN ('MOTERMEXPRESS15', 'MOTERMEXPRESS20', 'MOTERMEXPRESS30', 'MOTERMCOMPLETE15', 'MOTERMCOMPLETE20', 'MOTERMCOMPLETE30')
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	ELSE IF @ProductID IN ('ALLSTATECI', 'ALLSTATESTD', 'ALLSTATETERM')
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+	
+	ELSE IF @ProductID = 'ALLSTATEUL'
+	Begin
+		If @FieldName IN ('EE', 'EEEZ', 'SP', 'SPEZ')
+		Begin
+			Set @AddlCondition = case
+				when @FieldName IN ('EE', 'SP')  then @RelationCodeClause
+				when @FieldName IN ('EEEZ', 'SPEZ') then @RelationCodeClause + ' AND alt.Tier = ''EZ'''
+				end
+				Select @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, @AddlCondition, 0, 'et2')
+		End
+		Else
+		Begin
+			exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+		End
+	End
+
+
+	Else If @ProductID = 'AMGENCANCER'	
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID IN ('BMCCI', 'BMDI', 'BMWLIFE')
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID = 'BONDS'
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	-- // The spreadsheet handles the COKC FSA as a single entity. The CCM product maintain section handles it as two separate entities. Using one of the definitions used by the product section enables the app to properly handle the product.
+	Else If @ProductID = 'COKCFSA_MED'	
+	Begin
+		If @FieldName = 'MEDFSA'
+			Select @Sql2 = 'MEDFSA = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.ClientSubProductID = ''COKCFSA_MED''', 0, 'et2')
+		Else If @FieldName = 'DEPFSA'
+			Select @Sql2 = 'DEPFSA = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.ClientSubProductID = ''COKCFSA_DEP''', 0, 'et2')
+	End
+
+/*
+		IF @FieldName = 'MEDFSA'
+			SELECT 'MEDFSA = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.ClientSubProductID = ''COKCFSA_MED''', 'et2')
+		ELSE IF @FieldName = 'DEPFSA'
+			SELECT 'DEPFSA = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.ClientSubProductID = ''COKCFSA_DEP''', 'et2')
+		ELSE
+			exec  usp_RptBuildProductSegmentExtended2 @CurDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+*/
+
+
+	Else If @ProductID IN ('EYEMEDVIS', 'EYEMEDVIS2')
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID = 'HARTFORDLTD'
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID = 'TMARKCANCER'
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID = 'TMARKCOMBO' OR @ProductID = 'TMARKCI'
+	Begin
+		If @FieldName IN ('EE', 'EESP', 'EECH', 'FAM')
+			Select @Sql2 = @FieldName + ' = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, @RelationCodeClause, 0, 'et2')
+		Else If @FieldName = 'EZ1_5'
+			Select @Sql2 = @FieldName + ' = ' + dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.Tier = ''EZ1_5''', 0, 'et2')
+		Else
+			exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+	End
+
+
+/*
+	ELSE IF @ProductID = 'TMARKCOMBO'
+		IF @FieldName = 'EE'
+			SELECT 'EE = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''E'' AND (alt.Tier is null or alt.Tier = ''EZ1_5'')', 'et2')
+		ELSE IF @FieldName = 'EESP'
+			SELECT 'EESP = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''ESP'' AND (alt.Tier is null or alt.Tier = ''EZ1_5'')', 'et2')
+		ELSE IF @FieldName = 'EECH'
+			SELECT 'EECH = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''ECH'' AND (alt.Tier is null or alt.Tier = ''EZ1_5'')', 'et2')
+		ELSE IF @FieldName = 'FAM'
+			SELECT 'FAM = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''FAM'' AND (alt.Tier is null or alt.Tier = ''EZ1_5'')', 'et2')
+		ELSE IF @FieldName = 'EZ1_5'
+			SELECT 'EZ1_5 = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode IN  (''E'', ''ESP'', ''ECH'', ''FAM'')  AND alt.Tier = ''EZ1_5''', 'et2')
+		ELSE
+			exec  usp_RptBuildProductSegmentExtended2 @CurDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+*/
+
+
+/*
+	ELSE IF @ProductID = 'TMARKUL'
+		IF @FieldName = 'EE'
+			SELECT 'EE = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''E'' AND (alt.Tier is null or alt.Tier = ''''  or alt.Tier IN  (''EZ1_10'', ''EZ2_5'', ''EZ1_5''))', 'et2')
+		ELSE IF @FieldName = 'SP'
+			SELECT 'SP = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''S'' AND (alt.Tier is null or alt.Tier = '''' or alt.Tier IN  (''EZ1_10'', ''EZ2_5'', ''EZ1_5''))', 'et2')
+		ELSE IF @FieldName = 'DEP'
+			SELECT 'DEP = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''DEP'' AND (alt.Tier is null or alt.Tier = '''' or alt.Tier IN  (''EZ1_10'', ''EZ2_5'', ''EZ1_5''))', 'et2')
+		ELSE IF @FieldName = 'EZ1_10'
+			SELECT 'EZ1_10 = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.Tier = ''EZ1_10''', 'et2')
+		ELSE IF @FieldName = 'EZ2_5'
+			SELECT 'EZ2_5 = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.Tier = ''EZ2_5''', 'et2')
+		ELSE IF @FieldName = 'EZ1_5'
+			SELECT 'EZ1_5 = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.Tier = ''EZ1_5''', 'et2')
+		ELSE
+			exec  usp_RptBuildProductSegmentExtended2 @CurDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+*/
+
+	Else If @ProductID = 'TMARKUL' OR @ProductID = 'TMARKUL2'
+	Begin
+		If @FieldName In ('EE', 'SP', 'DEP', 'EZ1_10', 'EZ2_5', 'EZ1_5')
+		Begin
+			Set @AddlCondition = case
+				when @FieldName In ('EE', 'SP', 'DEP') then @RelationCodeClause
+				when @FieldName = 'EZ1_10' then 'alt.Tier = ''EZ1_10'''
+				when @FieldName = 'EZ2_5' then 'alt.Tier = ''EZ2_5'''
+				when @FieldName = 'EZ1_5' then 'alt.Tier = ''EZ1_5'''
+				end
+				Select @Sql2 = @FieldName + ' = ' + dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, @AddlCondition, 0, 'et2')
+		End
+		Else
+		Begin
+			exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+		End
+	End
+
+	Else If @ProductID = 'TRANSCANCERSELPLUS'
+	Begin
+		If @FieldName In ('EE', 'EECH', 'FAM', 'PLAN1', 'PLAN2')
+		Begin
+			Set @AddlCondition = case 
+				when @FieldName In  ('EE', 'EECH', 'FAM') then @RelationCodeClause
+				when @FieldName = 'PLAN1' then 'alt.Tier = ''PLAN1'''
+				when @FieldName = 'PLAN2' then 'alt.Tier = ''PLAN2'''
+				end
+				Select @Sql2 = @FieldName + ' = ' + dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, @AddlCondition, 0, 'et2')
+		End
+		Else
+		Begin
+			exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+		End
+	End
+
+/*
+	Else If @ProductID = 'TRANSCANCERSELPLUS'
+		IF @FieldName = 'EE'
+			SELECT 'EE = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''E'' AND (alt.Tier is null or alt.Tier IN  (''PLAN1'', ''PLAN2''))', 'et2')
+		ELSE IF @FieldName = 'EECH'
+			SELECT 'EECH = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''ECH'' AND (alt.Tier is null or alt.Tier IN  (''PLAN1'', ''PLAN2''))', 'et2')
+		ELSE IF @FieldName = 'FAM'
+			SELECT 'FAM = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.RelationCode = ''FAM'' AND (alt.Tier is null or alt.Tier IN  (''PLAN1'', ''PLAN2''))', 'et2')
+		ELSE IF @FieldName = 'PLAN1'
+			SELECT 'PLAN1 = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.Tier= ''PLAN1''', 'et2')
+		ELSE IF @FieldName = 'PLAN2'
+			SELECT 'PLAN2 = ' +  dbo.ufn_BuildProductSegment3_Extended(@ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CurDate, 'alt.Tier= ''PLAN2''', 'et2')
+		ELSE
+			exec  usp_RptBuildProductSegmentExtended2 @CurDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+*/	
+	Else If @ProductID IN ('TRANSDI', 'TRANSTERM', 'TRANSUL2')
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+	Else If @ProductID = 'UNUMACC'
+		exec  usp_RptBuildProductSegmentExtended2 @CallDate, @ClientID, @ProductID, @FieldName, @Sql2 OUTPUT
+
+
+	Select @RetVal = @ProductID
+	Return
+END
+
+SET NOCOUNT OFF
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE     PROCEDURE usp_RptBuildProductSegmentExtended2(@CallDate smalldatetime, @ClientID varchar(20), @ProductID varchar(20), @FieldName varchar(20), @Sql2 varchar(5000) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+BEGIN
+
+
+
+	IF @FieldName = 'YES'
+	Begin
+		SELECT @Sql2 = 'Yes =  (SELECT Count (*) FROM ProjectReports..EmpTransmittal etOuter '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN '
+		SELECT @Sql2 = @Sql2 + '(SELECT DISTINCT etYes.ActivityID '
+		SELECT @Sql2 = @Sql2 + 'FROM ProjectReports..EmpProductTransmittal eptYes '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN ProjectReports..EmpTransmittal etYes ON eptYes.ActivityID = etYes.ActivityID '
+		SELECT @Sql2 = @Sql2 + 'INNER JOIN BVI..Client bviclient ON etYes.ClientID = bviclient.ClientID '
+		SELECT @Sql2 = @Sql2 + dbo.ufn_GetClientJoin(@ClientID, 'etYes')
+		SELECT @Sql2 = @Sql2 + 'WHERE eptYes.LogicalDelete = 0 AND '
+		SELECT @Sql2 = @Sql2 + dbo.ufn_GetClientWhere(@ClientID, 'etYes')
+		SELECT @Sql2 = @Sql2 + 'eptYes.LicensedEnroller = u.UserID AND eptYes.ProductID = ''' + @ProductID + ''' AND '
+
+		-- 11/27/2009
+		SELECT @Sql2 = @Sql2 + 'dbo.ufn_IsAPSLegal(eptYes.ActivityID, eptYes.AppID, eptYes.ClientID, eptYes.ProductID) = 1 AND '
+
+		SELECT @Sql2 = @Sql2 + 'dbo.ufn_IsDateEqual(etYes.CallStartTime, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 AND etYes.SupervisorApprovalDate IS NOT NULL) '
+		SELECT @Sql2 = @Sql2 + 'YesSpecial ON etOuter.ActivityID = YesSpecial.ActivityID) '
+	End
+
+	Else If @FieldName = 'EE'
+		Select @Sql2 = 'EE = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''E''', 0, 'et2')
+
+	Else If @FieldName = 'EE+1'
+		Select @Sql2 = 'EE+1 = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''EE+1''', 0, 'et2')
+
+	Else If @FieldName = 'SP'
+		Select @Sql2 = 'SP = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''S''', 0, 'et2')
+
+	Else If @FieldName = 'CH'
+		Select @Sql2 = 'CH = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''C''', 0, 'et2')
+
+	Else If @FieldName = 'EESP'
+		Select @Sql2 = 'EESP = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''ESP''', 0, 'et2')
+
+	Else If @FieldName = 'EECH'
+		Select @Sql2 = 'EECH = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''ECH''', 0, 'et2')
+
+	Else If @FieldName = 'SPCH'
+		Select @Sql2 = 'SPCH = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''SPC''', 0, 'et2')
+
+	Else If @FieldName = 'FAM'
+		Select @Sql2 = 'FAM = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''FAM''', 0, 'et2')
+
+	Else If @FieldName = 'DEP'
+		Select @Sql2 = 'DEP = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'Count (*)', 'et2.CallStartTime', @CallDate, 'alt.RelationCode = ''C''', 0, 'et2')
+
+	Else If @FieldName = 'WEEKLYPREMIUM'	
+		Select @Sql2 = 'WEEKLYPREMIUM = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'IsNull(Convert(varchar, SUM(ept.WeeklyPremium)), 0)', 'et2.CallStartTime', @CallDate, '', 0, 'et2')
+
+	Else If @FieldName = 'ANNUALPREMIUM'
+		Select @Sql2 = 'ANNUALPREMIUM = ' +  dbo.ufn_RptBuildProductSegment3(1, @ClientID, @ProductID, 'IsNull(Convert(varchar, ROUND(SUM(ISNULL(ept.WeeklyPremium, 0)) * 52, 0)), 0)', 'et2.CallStartTime', @CallDate, '', 0, 'et2')
+END
+
+SET NOCOUNT OFF
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE     FUNCTION dbo.ufn_RptBuildProductSegment3
+(
+@SourceInd bit,
+@ClientID varchar(20),
+@ProductID varchar(20),
+@Selection varchar(200),
+@TestedDate varchar(20),
+@CallDate smalldatetime,
+@AddlCondition varchar(400),
+@APDJoinInd bit,
+@Prefix varchar(10)
+)
+RETURNS varchar(4000)
+AS
+BEGIN
+	DECLARE @Source varchar(9)
+	DECLARE @Results varchar(4000)
+
+	If @SourceInd = 0
+		Set @Source = 'standard'
+	Else	
+		Set @Source = 'extended'
+
+
+
+	SELECT @Results = '(SELECT ' + @Selection + ' ' 
+
+	If @Source = 'standard'
+	Begin
+		SELECT @Results = @Results + 'FROM  EmpProductTransmittal ept '
+	End
+	Else
+	Begin
+		SELECT @Results = @Results + 'FROM  Alt_ProductData alt '
+		SELECT @Results = @Results + 'INNER JOIN EmpProductTransmittal ept on alt.AltProductDataID = ept.AltProductDataID '
+	End
+
+	SELECT @Results = @Results + 'INNER JOIN EmpTransmittal et2 on ept.ActivityID = et2.ActivityID '
+	SELECT @Results = @Results + 'INNER JOIN BVI..Client bviclient ON et2.ClientID = bviclient.ClientID '
+	SELECT @Results = @Results + dbo.ufn_GetClientJoin(@ClientID, @Prefix)
+
+	-- // Standard links to IAMS
+	If @Source = 'standard'
+	Begin
+		SELECT @Results = @Results + 'INNER JOIN IAMS..AppsAndPolsSummary aps ON ept.ActivityID = aps.ActivityID AND ept.AppID = aps.AppID '
+		IF @APDJoinInd = 1
+			SELECT @Results = @Results + dbo.ufn_GetAppsAndPolsDataJoin()
+	End
+
+	SELECT @Results = @Results + 'WHERE ept.LogicalDelete = 0 AND '
+	SELECT @Results = @Results + 'et2.SupervisorApprovalDate IS NOT NULL AND '
+	SELECT @Results = @Results + dbo.ufn_GetClientWhere(@ClientID, @Prefix)
+	SELECT @Results = @Results + ' ept.LicensedEnroller = u.UserID AND '
+	SELECT @Results = @Results + 'ept.ProductID = ''' + @ProductID + ''' AND '
+
+	If @Source = 'standard'
+		SELECT @Results = @Results + ' aps.BVIAppStatus <> ''CANCELLED'' AND '
+
+	-- 11/27/2009
+	If @Source = 'extended'
+		SELECT @Results = @Results + 'dbo.ufn_IsAPSLegal(ept.ActivityID, ept.AppID, ept.ClientID, ept.ProductID) = 1 AND '
+
+
+	IF @AddlCondition <> ''
+		SELECT @Results = @Results + @AddlCondition + ' AND '
+
+	SELECT @Results = @Results + 'dbo.ufn_IsDateEqual(' + Convert(varchar, @TestedDate, 101) + ', ''' + Convert(varchar, @CallDate, 101) + ''') = 1 AND '
+	SELECT @Results = @Results  + 'dbo.ufn_IsTestID(bviclient.ClientID, et2.EmpID) = 0) '
+
+	RETURN @Results
+END
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+CREATE      PROCEDURE usp_RptBuildProductCompactor(@CallDate smalldatetime, @AddDate datetime,  @ClientID varchar(20), @ProductID varchar(20), @FieldName varchar(20), @Sql2 varchar(5000), @RetVal varchar(500) OUTPUT)
+AS
+
+SET NOCOUNT ON
+
+	Declare @Err int
+	Declare @EnrollerID varchar(20)
+	Declare @FieldData decimal(18,2)
+	Declare @Sql1 varchar(8000)
+	Declare @Sql3 varchar(3000)
+
+
+	Set @Sql2 = 'FieldData' + Right(@Sql2, len(@Sql2) - len(@FieldName))
+
+	-- // Complete the main from clause of the sql
+/*
+	SELECT @Sql1 = 'FROM UserManagement..Users u '
+	SELECT @Sql1 = @Sql1 + 'WHERE '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EmpTransmittal etMain '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN BVI..Client bviclient on etMain.ClientID = bviclient.ClientID '
+	SELECT @Sql1 = @Sql1 + 'WHERE etMain.LogicalDelete = 0 AND etMain.EnrollerID = u.UserID AND '
+	SELECT @Sql1 = @Sql1 +  'dbo.ufn_IsDateEqual(etMain.CallStartTime, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND etMain.SupervisorApprovalDate IS NOT NULL AND '
+	SELECT @Sql1 = @Sql1  + 'dbo.ufn_IsTestID(bviclient.ClientID, etMain.EmpID) = 0) > 0 '
+	SELECT @Sql1 = @Sql1  + 'OR '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EnrollerDate edMain '
+	SELECT @Sql1 = @Sql1 + 'WHERE edMain.EnrollerID = u.UserID AND dbo.ufn_IsDateEqual(edMain.ProjectDate, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND edMain.SupervisorApproval = 1) >0            '
+*/
+--/*
+	SELECT @Sql1 = 'FROM UserManagement..Users u '
+	SELECT @Sql1 = @Sql1 + 'WHERE '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EmpTransmittal etMain '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN BVI..Client bviclient on etMain.ClientID = bviclient.ClientID '
+	SELECT @Sql1 = @Sql1 + 'WHERE etMain.LogicalDelete = 0 AND etMain.EnrollerID = u.UserID AND '
+	SELECT @Sql1 = @Sql1 +  'dbo.ufn_IsDateEqual(etMain.CallStartTime, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND etMain.SupervisorApprovalDate IS NOT NULL AND '
+	SELECT @Sql1 = @Sql1  + 'dbo.ufn_IsTestID(bviclient.ClientID, etMain.EmpID) = 0) > 0 '
+	SELECT @Sql1 = @Sql1  + 'OR '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EmpProductTransmittal eptMain '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN ProjectReports..EmpTransmittal etMain on eptMain.ActivityID = etMain.ActivityID '
+	SELECT @Sql1 = @Sql1 + 'INNER JOIN BVI..Client bviclient on eptMain.ClientID = bviclient.ClientID '
+	SELECT @Sql1 = @Sql1 + 'WHERE eptMain.LogicalDelete = 0 AND eptMain.LicensedEnroller = u.UserID AND '
+	SELECT @Sql1 = @Sql1 +  'dbo.ufn_IsDateEqual(etMain.CallStartTime, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND etMain.SupervisorApprovalDate IS NOT NULL AND '
+	SELECT @Sql1 = @Sql1  + 'dbo.ufn_IsTestID(bviclient.ClientID, etMain.EmpID) = 0) > 0 '
+	SELECT @Sql1 = @Sql1  + 'OR '
+	SELECT @Sql1 = @Sql1 + '(SELECT Count(*) FROM ProjectReports..EnrollerDate edMain '
+	SELECT @Sql1 = @Sql1 + 'WHERE edMain.EnrollerID = u.UserID AND dbo.ufn_IsDateEqual(edMain.ProjectDate, ''' +  Convert(varchar, @CallDate, 101) + ''') = 1 '
+	SELECT @Sql1 = @Sql1 + 'AND edMain.SupervisorApproval = 1) >0   '
+--*/
+
+	-- // Concatenate the selection and the from clause
+	SELECT @Sql1 = @Sql2 + @Sql1 + '                        '
+
+	-- // Reset Rpt_ProductHistoryWorking
+	Delete Rpt_ProductHistoryWorking
+
+	-- // Prepare the insert for Rpt_ProductHistoryWorking
+	Set @Sql3 = 'INSERT INTO Rpt_ProductHistoryWorking (EnrollerID, CallDate, ClientID, ProductID, FieldName, FieldData)   '
+	Set @Sql3 = @Sql3 + 'SELECT EnrollerID = u.UserID, CallDate = ''' + Convert(varchar, @CallDate, 101) + ''', '
+	Set @Sql3 = @Sql3 + 'ClientID = ''' + @ClientID + ''', ProductID = ''' +  @ProductID + ''', '
+	Set @Sql3 = @Sql3 + 'FieldName = ''' + @FieldName + ''', '  + @Sql1
+
+	-- // Write the values to Rpt_ProductHistoryWorking
+	EXEC(@Sql3)
+	SELECT @Err = @@error
+	IF @Err <> 0
+	Begin
+		Select @RetVal = 'Error #1246|usp_RptBuildProductCompactor: Error inserting records into Rpt_ProductHistoryWorking: CallDate: ' + Convert(varchar, @CallDate, 101) + ', ClientID: ' + @ClientID + ', ProductID: ' +  @ProductID + ', FieldName: '  + @FieldName
+		Return
+	End
+
+	-- // Cycle through the working table. Transfer the information to Rpt_ProductHistory only if the FieldData field has a value other than 0.
+	DECLARE WorkingCursor CURSOR FOR Select EnrollerID, CallDate, ClientID, ProductID, FieldName, FieldData  From Rpt_ProductHistoryWorking Where FieldData <> 0
+	Open WorkingCursor
+	Fetch Next From WorkingCursor Into @EnrollerID, @CallDate, @ClientID, @ProductID, @FieldName, @FieldData
+	While @@Fetch_Status = 0
+	Begin
+		If (@FieldData <> 0) and (@FieldName <> 'WeeklyPremium')
+		Begin
+			Set @Sql3 = 'Insert Into Rpt_ProductHistory (AddDate, EnrollerID, CallDate, ClientID, ProductID, FieldName, FieldData) '
+			Set @Sql3 = @Sql3 + ' Values '
+			Set @Sql3 = @Sql3 + '(''' +      Convert(varchar, @AddDate, 120) + ''', '''    + @EnrollerID + ''', ''' + Convert(varchar, @CallDate, 102) + ''', ''' + @ClientID + ''', ''' + @ProductID + ''', ''' + @FieldName + ''', ' + Cast(@FieldData as varchar(10)) + ')'
+			Exec(@Sql3)
+			SELECT @Err = @@error
+			IF @Err <> 0
+			Begin
+				Select @RetVal = 'Error #1248|usp_RptBuildProductCompactor: Error inserting records into Rpt_ProductHistoryWorking: CallDate: ' + Convert(varchar, @CallDate, 101) + ', ClientID: ' + @ClientID + ', ProductID: ' +  @ProductID + ', FieldName: '  + @FieldName
+				Return
+			End
+
+		End
+	Fetch Next From WorkingCursor Into @EnrollerID, @CallDate, @ClientID, @ProductID, @FieldName, @FieldData
+	End
+
+	-- // Clean up the cursor
+	Close WorkingCursor
+	Deallocate WorkingCursor
+
+	Set @RetVal = '0|Success'
+
+
+SET NOCOUNT OFF

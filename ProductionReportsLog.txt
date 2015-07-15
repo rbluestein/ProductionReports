@@ -1,0 +1,199 @@
+[09/08/2009 7:04:03 PM]  ** ERROR FORCING APPLICATION SHUTDOWN **
+[09/08/2009 8:14:42 PM]  ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/10/2009 5:35:40 PM] Excel_Generic.GetRangeData  #100b Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/10/2009 6:20:21 PM] Error #r555b Excel.LoadData Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/10/2009 6:31:18 PM] Error #r555b Excel.LoadData Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/11/2009 4:39:44 PM] Excel_Generic.GetRangeData  #100b The object invoked has disconnected from its clients. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/23/2009 1:57:46 PM] Excel_Generic.GetRangeData  #100b Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/23/2009 3:51:02 PM] Excel_Generic.GetRangeData  #100b The object invoked has disconnected from its clients. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/23/2009 6:52:00 PM] Excel_Generic.GetRangeData  #100b Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/23/2009 6:57:06 PM] Excel_Generic.GetRangeData  #100b RangeName: _2009_Genesis   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/23/2009 8:51:20 PM] Excel_Generic.DateLookup  #1201 Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/23/2009 10:48:06 PM] Excel_Generic.GetRangeData  #100b RangeName: _2009_RDS   The object invoked has disconnected from its clients. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/24/2009 3:04:19 PM] Excel_Generic.GetRangeData  #100b RangeName: _2009_COKC   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/24/2009 3:11:43 PM] Excel_Generic.GetRangeData  #100b RangeName: _2009_Morgans   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/05/2009 5:13:12 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_Options|Choices ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/05/2009 5:17:56 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_Options|Choices ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/06/2009 12:15:54 AM]  ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/06/2009 4:36:46 AM] Error# 1451d: Rpt_EnrollCenterMonthly.GetCumValue Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/06/2009 3:36:23 PM] Error# 1451d: Rpt_EnrollCenterMonthly.GetCumValue Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/07/2009 4:56:57 AM] Error# 1451d: Rpt_EnrollCenterMonthly.GetCumValue Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/07/2009 1:41:25 PM] Error# 1451d: Rpt_EnrollCenterMonthly.GetCumValue Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/07/2009 4:11:26 PM] Error# 1451d: Rpt_EnrollCenterMonthly.GetCumValue Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/07/2009 6:39:15 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/18/2009 9:57:03 PM] Error #r555a Excel.LoadData Line 1: Incorrect syntax near ')'. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/19/2009 8:44:47 PM]  ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/21/2009 12:25:52 AM]  ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 3:04:28 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Invalid index. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 7:18:51 PM] Error# 1481: Rpt_EnrollerProductivity.ProcessCallCenter Specified argument was out of the range of valid values.
+Parameter name: Month must be between one and twelve. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 7:23:54 PM] Error# 1481: Rpt_EnrollerProductivity.ProcessCallCenter Specified argument was out of the range of valid values.
+Parameter name: Month must be between one and twelve. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 9:02:16 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_EZTmark ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 9:03:48 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_EZTmark ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 9:04:38 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_EZTmark ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 9:05:32 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_EZTmark ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 9:06:38 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_EZTmark ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2009 9:07:17 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2009_EZTmark ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/04/2010 3:02:36 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_OptionsChoices ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/05/2010 3:00:48 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_EyeMedVis ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/12/2010 2:28:46 PM]  Unsupervisor-approved record found on 01/11/2010. Unsupervisor-approved record found on 01/11/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. Unsupervisor-approved record found on 01/12/2010. ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/12/2010 2:31:29 PM]  Unsupervisor-approved record found on 01/11/2010. Unsupervisor-approved record found on 01/11/2010. ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/21/2010 2:31:11 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_EyeMedVis ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/21/2010 2:45:58 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Invalid index. ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/21/2010 2:51:12 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_EyeMedVis ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/21/2010 2:56:05 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_EyeMedVis ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/04/2010 5:43:59 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Morgans   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/09/2010 3:02:55 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_BureauVeritas   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/15/2010 12:37:28 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_BureauVeritas   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/15/2010 1:40:52 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Martinrea   The RPC server is unavailable. ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/16/2010 2:12:11 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Fulton   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/18/2010 2:45:31 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Cast from string "" to type 'Date' is not valid. ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/09/2010 4:41:46 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_PKOH   The RPC server is unavailable. ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/16/2010 3:52:31 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_SFWMD   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/19/2010 5:04:09 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Superior   Exception from HRESULT: 0x800A01A8. ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/24/2010 5:35:04 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_PKOH   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[04/06/2010 10:48:57 AM] ExcelBase.ExcelColumnToNumber  #100 Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[04/06/2010 10:55:53 AM] ExcelBase.ExcelColumnToNumber  #100 Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[04/06/2010 11:00:05 AM] ExcelBase.ExcelColumnToNumber  #100 Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[04/21/2010 6:17:07 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Superior   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[05/03/2010 4:38:15 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Stantec   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[07/20/2010 8:02:33 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Fulton   The object invoked has disconnected from its clients. ** ERROR FORCING APPLICATION SHUTDOWN **
+[08/09/2010 5:45:33 PM] Error# 1452: Rpt_EnrollCenterMonthly.GetClientProdColl Object variable or With block variable not set. ** ERROR FORCING APPLICATION SHUTDOWN **
+[08/27/2010 7:18:03 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Morgans   The RPC server is unavailable. ** ERROR FORCING APPLICATION SHUTDOWN **
+[08/27/2010 8:46:01 PM] Main #100 Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[08/31/2010 7:35:04 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_RDS   The object invoked has disconnected from its clients. ** ERROR FORCING APPLICATION SHUTDOWN **
+[09/01/2010 8:24:12 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Superior   The object invoked has disconnected from its clients. ** ERROR FORCING APPLICATION SHUTDOWN **
+[09/15/2010 9:09:48 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Superior   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/15/2010 9:46:03 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Dates   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/15/2010 10:10:16 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Options|Choices   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/15/2010 10:32:16 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Weathershield   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/15/2010 11:21:55 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Martinrea   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/19/2010 7:48:47 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/19/2010 8:19:49 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/19/2010 8:21:17 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/19/2010 8:22:37 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/25/2010 7:10:31 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Stantec   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/26/2010 12:38:46 PM] ExcelBase.ExcelColumnToNumber  #100 Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/27/2010 7:31:45 PM] Error #2452: ExcelClusterData BuildClusterSegmentColl. Error #3350: ClusterSegmentItem GetSegmentList. Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/27/2010 7:32:17 PM] Error #2452: ExcelClusterData BuildClusterSegmentColl. Error #3350: ClusterSegmentItem GetSegmentList. Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/27/2010 7:33:27 PM] Error #2452: ExcelClusterData BuildClusterSegmentColl. Error #3350: ClusterSegmentItem GetSegmentList. Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/27/2010 7:33:59 PM] Error #2452: ExcelClusterData BuildClusterSegmentColl. Error #3350: ClusterSegmentItem GetSegmentList. Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/29/2010 9:41:03 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Fulton   Call was rejected by callee. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/15/2010 11:40:28 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Stantec   Exception from HRESULT: 0x800AC472. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/06/2010 9:28:41 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Armstrong   Specified cast is not valid. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/15/2010 9:08:07 PM] Excel_Generic.New  #1202 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/17/2010 1:00:19 AM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Morgans   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/21/2010 7:50:10 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_AllState_GNC_UL ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/21/2010 7:53:21 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_AllState_GNC_UL ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/21/2010 7:55:54 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2010_AllState_GNC_UL ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/22/2010 8:26:07 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_Dates   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2010 3:58:56 PM] Excel_Generic.GetRangeData  #100b RangeName: _2010_CTCA   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/04/2011 7:04:24 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_PKOH ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/04/2011 7:06:40 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_PKOH ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/04/2011 7:08:22 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_PKOH ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/04/2011 7:11:38 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_HT ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/05/2011 11:58:44 AM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_HT ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/05/2011 12:00:53 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_HT ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/05/2011 12:09:39 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Argument 'Index' is not a valid value. ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/05/2011 12:12:31 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Argument 'Index' is not a valid value. ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/07/2011 8:03:10 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/07/2011 8:05:47 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/07/2011 8:06:34 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/07/2011 8:16:18 PM] Excel_Generic.New  #1202 'C:\Apps\ProductionReports\Templates\Rpt_BVIProduction_Template.xls' could not be found. Check the spelling of the file name, and verify that the file location is correct.
+
+If you are trying to open the file from your list of most recently used files on the File menu, make sure that the file has not been renamed, moved, or deleted. ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/07/2011 9:19:12 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_Stantec   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/11/2011 8:23:07 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_Morgans   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[01/18/2011 2:47:50 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_DioPitt   Call was rejected by callee. (Exception from HRESULT: 0x80010001 (RPC_E_CALL_REJECTED)) ** ERROR FORCING APPLICATION SHUTDOWN **
+[02/23/2011 11:45:17 AM] Excel_Generic.GetRangeData  #100b RangeName: _2011_Dates   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/01/2011 5:54:27 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/01/2011 7:13:38 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[03/01/2011 8:03:43 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[05/10/2011 4:16:07 PM] Error# 1250: SupervisorReport.Init Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[06/02/2011 5:03:17 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_IPBC   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[07/06/2011 7:24:50 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_DioPitt   The object invoked has disconnected from its clients. (Exception from HRESULT: 0x80010108 (RPC_E_DISCONNECTED)) ** ERROR FORCING APPLICATION SHUTDOWN **
+[07/11/2011 7:07:59 PM] Main #100 Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[09/09/2011 7:17:11 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_PKOH   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/20/2011 11:01:07 PM] Excel_Generic.GetRangeData  #100b RangeName: _2011_BureauVeritas   The remote procedure call failed. (Exception from HRESULT: 0x800706BE) ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/13/2011 4:40:25 PM] Error# 1250: SupervisorReport.Init Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/14/2011 11:52:55 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Argument 'Index' is not a valid value. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/14/2011 3:02:43 AM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_Vincents ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/14/2011 8:36:18 AM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_Vincents ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/14/2011 9:31:47 AM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_UFCW204 ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/14/2011 10:23:56 AM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_LNT_EZ ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/14/2011 11:31:46 AM] Excel_Generic.GetRangeData  #100a Unable to find range _2011_PepBoys_EZ ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/15/2011 11:08:23 AM] Excel_Generic.GetRangeData  #100b RangeName: _2011_DioPitt   Exception from HRESULT: 0x800A01A8 ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/15/2011 2:05:11 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2911_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[04/18/2012 11:27:49 PM] Excel_Generic.GetRangeData  #100b RangeName: _2012_SFWMD   Unable to cast COM object of type 'System.__ComObject' to interface type 'Microsoft.Office.Interop.Excel.Names'. This operation failed because the QueryInterface call on the COM component for the interface with IID '{000208B8-0000-0000-C000-000000000046}' failed due to the following error: The RPC server is unavailable. (Exception from HRESULT: 0x800706BA). ** ERROR FORCING APPLICATION SHUTDOWN **
+[08/02/2012 7:38:22 PM] Excel_Generic.GetRangeData  #100b RangeName: _2012_RDS   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[08/07/2012 4:28:36 PM] Excel_Generic.GetRangeData  #100b RangeName: _2012_Options|Choices   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[09/05/2012 3:42:37 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2012_WISEDGE ** ERROR FORCING APPLICATION SHUTDOWN **
+[09/05/2012 3:58:06 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2012_WISEDGE ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/24/2012 2:02:02 PM] Main #100 Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/12/2012 2:41:42 PM] Excel_Generic.GetRangeData  #100b RangeName: _2012_GNC   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/10/2012 1:20:27 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2012_IBPC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/10/2012 9:26:41 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2012_IBPC ** ERROR FORCING APPLICATION SHUTDOWN **
+[4/2/2013 3:24:04 PM] Excel_Generic.GetRangeData  #100b RangeName: _2013_BureauVeritas   Exception from HRESULT: 0x800A01A8 ** ERROR FORCING APPLICATION SHUTDOWN **
+[4/30/2013 1:14:24 PM] Excel_Generic.GetRangeData  #100b RangeName: _2013_PKOH   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[5/6/2013 11:37:40 AM] Excel_Generic.GetRangeData  #100b RangeName: _2013_CTCA   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[5/6/2013 1:07:23 PM] Excel_Generic.GetRangeData  #100b RangeName: _2013_WisEdge   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/1/2013 1:41:28 PM] Error# 1250: SupervisorReport.Init Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/1/2013 3:25:27 PM] Error# 1250: SupervisorReport.Init Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/2/2013 5:44:53 PM] Excel_Generic.GetRangeData  #100b RangeName: _2013_BureauVeritas   Exception from HRESULT: 0x800A01A8 ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/3/2013 7:29:36 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/4/2013 12:54:21 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/4/2013 1:36:26 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/4/2013 2:07:06 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/4/2013 5:11:22 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/8/2013 1:41:41 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/8/2013 2:35:44 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/8/2013 2:43:47 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/8/2013 2:47:48 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/8/2013 2:51:51 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_PACarp ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/10/2013 11:58:09 AM] Main #100 Could not load file or assembly 'Microsoft.Office.Interop.Excel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c' or one of its dependencies. The system cannot find the file specified. ** ERROR FORCING APPLICATION SHUTDOWN **
+[10/10/2013 11:58:38 AM] Main #100 Could not load file or assembly 'Microsoft.Office.Interop.Excel, Version=11.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c' or one of its dependencies. The system cannot find the file specified. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/12/2013 7:23:50 PM] Error# 1450: Rpt_EnrollCenterMonthly.InitRange Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/12/2013 8:17:07 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_LegalShield ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/12/2013 8:19:26 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_LegalShield ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/26/2013 12:09:43 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_Cardinal ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/26/2013 12:22:49 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_Cardinal ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/26/2013 12:23:17 PM] Excel_Generic.GetRangeData  #100a Unable to find range _2013_Cardinal ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/27/2013 6:21:34 PM] Error# 1450: Rpt_BVIProduction.Init Invalid index. (Exception from HRESULT: 0x8002000B (DISP_E_BADINDEX)) ** ERROR FORCING APPLICATION SHUTDOWN **
+[11/27/2013 7:03:34 PM] Error# 1450: Rpt_BVIProduction.Init Invalid index. (Exception from HRESULT: 0x8002000B (DISP_E_BADINDEX)) ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/2/2013 12:48:55 PM] Error# 1450: Rpt_BVIProduction.Init Invalid index. (Exception from HRESULT: 0x8002000B (DISP_E_BADINDEX)) ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/2/2013 12:59:27 PM] Error# 1450: Rpt_BVIProduction.Init Invalid index. (Exception from HRESULT: 0x8002000B (DISP_E_BADINDEX)) ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/2/2013 2:54:54 PM] Excel_Generic.GetRangeData  #555.7 RangeName: _2013_WisEdge   Exception from HRESULT: 0x800AC472 ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:15:31 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:17:34 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:44:07 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:44:52 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:51:40 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:52:50 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/4/2013 4:53:27 PM] ExcelClusterData.GetClientSegmentFieldList  #100 There is no row at position 0. ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/2/2014 12:27:40 PM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2014_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/2/2014 12:43:45 PM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2014_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/27/2014 2:31:22 PM] Main #100 Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[5/5/2014 5:57:06 PM] Excel_Generic.GetRangeData  #555.7 RangeName: _2014_PKOH   Exception from HRESULT: 0x800401A8 ** ERROR FORCING APPLICATION SHUTDOWN **
+[9/9/2014 12:45:14 AM] Excel_Generic.GetRangeData  #555.7 RangeName: _2014_Gamestop   Index was outside the bounds of the array. ** ERROR FORCING APPLICATION SHUTDOWN **
+[9/9/2014 1:45:32 PM] Error# 1450: Rpt_BVIProduction.Init Object reference not set to an instance of an object. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/22/2014 5:45:57 PM] Error# 1454: Rpt_BVIProduction.GetSectionOneColl Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/22/2014 5:46:09 PM] Error# 1454: Rpt_BVIProduction.GetSectionOneColl Add failed. Duplicate key value supplied. ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 3:16:02 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 4:07:33 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 4:09:50 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 4:11:22 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 4:58:28 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 5:42:14 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 5:43:03 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 5:43:53 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 6:18:32 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 6:18:58 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 6:23:22 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/23/2014 6:28:11 PM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[12/24/2014 10:01:11 AM] Excel_Generic.New  #555.4 Exception from HRESULT: 0x800A03EC ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/4/2015 6:41:16 PM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2015_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/7/2015 10:45:38 AM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2015_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/7/2015 10:49:17 AM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2015_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/12/2015 2:33:23 PM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2015_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
+[1/12/2015 2:52:44 PM] Excel_Generic.GetRangeData  #555.7a Unable to find range _2015_Dates ** ERROR FORCING APPLICATION SHUTDOWN **
